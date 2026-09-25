@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="en" class="locked">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Sharjeel &amp; Nozaina — Wedding Invitation</title>
+<meta name="description" content="Wedding invitation of Sharjeel Mustafa Shahid — Mehndi, Barat and Walima, 18–20 December 2026, Tajpura, Lahore.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Great+Vibes&display=swap">
+
+<style>
+  :root{
+    /* Sampled from the final frame of the animation, so the page and the film match.
+       To switch to the navy palette of the printed card, change --ink to #14315e. */
+    --ink:   #2e3b1f;  /* deep drape olive */
+    --gold:  #a98545;  /* candlelight gold */
+    --cream: #f8f6ea;  /* the open field in the final frame */
+    --muted: #5b6450;
+    --light: #f4efdf;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html{ background:#000; }
+
+  body{
+    margin:0;
+    background:#000;
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  /* Scrolling stays locked until the film has finished playing. */
+  html.locked, html.locked body{ height:100%; overflow:hidden; }
+
+  /* ------------------------------ the film ------------------------------ */
+
+  .screen{
+    position:relative;
+    min-height:100vh;
+    min-height:100svh;
+    display:grid;
+    place-items:center;
+  }
+
+  /* 9:16 stage, sized to fit the viewport on both phone and desktop */
+  .stage{
+    position:relative;
+    aspect-ratio:720 / 1280;
+    width:min(100vw, 56.25vh);
+    width:min(100vw, 56.25svh);
+    background:#000;
+    overflow:hidden;
+    box-shadow:0 0 90px rgba(0,0,0,.9);
+  }
+
+  .stage > video,
+  .stage > img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+  }
+
+  /* Gentle "I'm tappable" breathing, only before the film starts */
+  .stage:not(.playing) > video{
+    animation:breathe 3.4s ease-in-out infinite;
+  }
+  @keyframes breathe{
+    0%,100%{ transform:scale(1); }
+    50%    { transform:scale(1.012); }
+  }
+
+  /* The final frame, held as a still so the ending never flickers or resets */
+  #still{
+    opacity:0;
+    transition:opacity .45s ease;
+    pointer-events:none;
+  }
+  .stage.finished > #still{ opacity:1; }
+
+  /* Invisible, keyboard-reachable tap target covering the closed envelope */
+  #open{
+    position:absolute;
+    inset:0;
+    border:0;
+    padding:0;
+    background:transparent;
+    cursor:pointer;
+    z-index:3;
+  }
+  #open:focus-visible{
+    outline:2px solid var(--gold);
+    outline-offset:-6px;
+  }
+  .stage.playing > #open{ display:none; }
+
+  /* ---- The names, laid into the empty cream field of the last frame ---- */
+  .names{
+    position:absolute;
+    left:0;
+    right:0;
+    top:54%;                       /* optical centre of the open cream area */
+    transform:translateY(-50%);
+    z-index:2;
+    margin:0;
+    text-align:center;
+    font-weight:400;
+    /* 9.5% of the stage width, without needing container queries */
+    font-size:min(9.5vw, 5.34vh);
+    line-height:1;
+    opacity:0;
+    pointer-events:none;
+  }
+  .stage.finished > .names{
+    animation:rise 1.5s cubic-bezier(.22,.61,.36,1) .35s forwards;
+  }
+  @keyframes rise{
+    from{ opacity:0; transform:translateY(calc(-50% + .5em)); }
+    to  { opacity:1; transform:translateY(-50%); }
+  }
+
+  .names .n{
+    display:block;
+    font-family:"Great Vibes", "Snell Roundhand", "Apple Chancery", cursive;
+    font-size:1.45em;
+    line-height:1.18;
+    color:var(--ink);
+    white-space:nowrap;
+    text-shadow:0 1px 2px rgba(248,246,234,.65);
+  }
+
+  .names .amp{
+    display:block;
+    font-family:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+    font-style:italic;
+    font-size:.62em;
+    line-height:1;
+    color:var(--gold);
+    margin:.12em 0 .06em;
+  }
+
+  /* ---------------------------- mute control ---------------------------- */
+
+  /* Dark pill: this floats over both the black surround and the cream artwork,
+     so it needs to stay legible against either. */
+  .mute{
+    position:fixed;
+    top:clamp(.7rem,2.4vw,1.1rem);
+    right:clamp(.7rem,2.4vw,1.1rem);
+    z-index:20;
+    width:38px;
+    height:38px;
+    padding:0;
+    display:grid;
+    place-items:center;
+    border:1px solid rgba(169,133,69,.7);
+    border-radius:50%;
+    background:rgba(8,10,6,.5);
+    -webkit-backdrop-filter:blur(6px);
+    backdrop-filter:blur(6px);
+    color:#e8d9b5;
+    cursor:pointer;
+  }
+  .mute[hidden]{ display:none; }
+  .mute:focus-visible{ outline:2px solid var(--gold); outline-offset:3px; }
+  .mute svg{ width:19px; height:19px; overflow:visible; }
+  .mute .horn{ fill:currentColor; }
+  .mute .wave{ fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; }
+  .mute .slash{ stroke:currentColor; stroke-width:1.8; stroke-linecap:round; display:none; }
+  .mute.is-muted .wave{ display:none; }
+  .mute.is-muted .slash{ display:block; }
+
+  /* --------------------------- the scroll cue --------------------------- */
+
+  .cue{
+    position:absolute;
+    left:50%;
+    bottom:clamp(.9rem, 3vh, 1.6rem);
+    transform:translateX(-50%);
+    z-index:4;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:.4rem;
+    margin:0;
+    padding:.58rem 1.15rem .5rem;
+    border:1px solid rgba(169,133,69,.75);
+    border-radius:999px;
+    /* Light pill: the last frame is cream, and that is what this sits on */
+    background:rgba(248,246,234,.86);
+    -webkit-backdrop-filter:blur(6px);
+    backdrop-filter:blur(6px);
+    box-shadow:0 2px 14px rgba(46,59,31,.18);
+    color:var(--ink);
+    font-family:"Cormorant Garamond", Georgia, serif;
+    font-size:.7rem;
+    font-weight:500;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    cursor:pointer;
+    opacity:0;
+    visibility:hidden;
+    transition:opacity .7s ease .8s, visibility .7s ease .8s;
+  }
+  .stage.finished ~ .cue{ opacity:1; visibility:visible; }
+  .cue:focus-visible{ outline:2px solid var(--gold); outline-offset:3px; }
+
+  .cue i{
+    width:8px;
+    height:8px;
+    border-right:1.5px solid currentColor;
+    border-bottom:1.5px solid currentColor;
+    transform:rotate(45deg);
+    animation:nudge 1.9s ease-in-out infinite;
+  }
+  @keyframes nudge{
+    0%,100%{ transform:rotate(45deg) translate(0,0); }
+    50%    { transform:rotate(45deg) translate(2px,2px); }
+  }
+
+  /* --------------------------- the details ----------------------------- */
+
+  .details{
+    position:relative;
+    overflow:hidden;
+    background:var(--cream);
+    color:var(--ink);
+    font-family:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+    padding:clamp(2.6rem,8vw,5rem) clamp(1.1rem,5vw,2rem) clamp(1.8rem,5vw,3rem);
+  }
+
+  /* Double gold frame, echoing the border on the printed card */
+  .details::before,
+  .details::after{
+    content:"";
+    position:absolute;
+    z-index:0;
+    pointer-events:none;
+    border:1px solid rgba(169,133,69,.45);
+  }
+  .details::before{
+    inset:clamp(10px,2.6vw,22px);
+    border-color:rgba(169,133,69,.55);
+  }
+  .details::after{
+    inset:calc(clamp(10px,2.6vw,22px) + 5px);
+    border-color:rgba(169,133,69,.2);
+  }
+
+  /* Floral corners, cut from the animation itself so the artwork matches exactly.
+     Two images cover four corners because CSS mirrors them. The radial mask
+     feathers the edges, since the cream in the source frames is not perfectly
+     uniform and a hard crop edge would read as a faint box. */
+  .flora{
+    position:absolute;
+    z-index:1;
+    pointer-events:none;
+    width:clamp(96px, 25%, 215px);
+    background-repeat:no-repeat;
+    background-size:contain;
+    opacity:.82;
+  }
+  .flora.art-l{
+    aspect-ratio:284 / 430;
+    background-image:url(assets/flora-2.jpg);
+    -webkit-mask-image:radial-gradient(112% 92% at 0% 50%, #000 26%, transparent 74%);
+            mask-image:radial-gradient(112% 92% at 0% 50%, #000 26%, transparent 74%);
+  }
+  .flora.art-r{
+    aspect-ratio:264 / 440;
+    background-image:url(assets/flora-1.jpg);
+    -webkit-mask-image:radial-gradient(112% 92% at 100% 50%, #000 26%, transparent 74%);
+            mask-image:radial-gradient(112% 92% at 100% 50%, #000 26%, transparent 74%);
+  }
+  /* Nudged outward so they read as edge decoration and leave the centred text clear */
+  .f-tl{ top:-1%;   left:-4%;  }
+  .f-tr{ top:2%;    right:-4%; }
+  .f-bl{ bottom:8%; left:-4%;  transform:scaleX(-1); }
+  .f-br{ bottom:0;  right:-4%; transform:scaleX(-1); }
+  /* Smaller and fainter, just so the long middle stretch is not bare */
+  .f-ml, .f-mr{
+    width:clamp(78px, 19%, 165px);
+    opacity:.55;
+    transform:scaleX(-1);
+  }
+  .f-ml{ top:38%; left:-5%;  }
+  .f-mr{ top:60%; right:-5%; }
+
+  .sheet{
+    position:relative;
+    z-index:2;
+    max-width:680px;
+    margin:0 auto;
+    text-align:center;
+  }
+
+  .bismillah{
+    font-family:"Amiri", "Geeza Pro", serif;
+    font-size:clamp(1.45rem,6vw,2.1rem);
+    line-height:2;
+    color:var(--gold);
+    margin:0 0 .45rem;
+  }
+
+  .bismillah-en{
+    font-style:italic;
+    font-size:clamp(.82rem,3.1vw,.96rem);
+    color:var(--muted);
+    margin:0;
+  }
+
+  .blessing{
+    font-weight:400;
+    margin:clamp(1.5rem,5vw,2.2rem) 0 0;
+    font-family:"Great Vibes", cursive;
+    line-height:1.14;
+  }
+  .blessing span{ display:block; }
+  .blessing .b1{ color:var(--gold); font-size:clamp(2.1rem,8.5vw,3.3rem); }
+  .blessing .b2{ color:var(--ink);  font-size:clamp(2.4rem,9.5vw,3.7rem); }
+
+  .rule{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:.7rem;
+    margin:clamp(1.5rem,4.5vw,2.3rem) 0;
+  }
+  .rule::before,
+  .rule::after{
+    content:"";
+    height:1px;
+    width:min(96px,20vw);
+  }
+  .rule::before{ background:linear-gradient(90deg,transparent,var(--gold)); }
+  .rule::after { background:linear-gradient(90deg,var(--gold),transparent); }
+  .rule i{
+    flex:none;
+    width:7px;
+    height:7px;
+    background:var(--gold);
+    transform:rotate(45deg);
+  }
+
+  .lede{
+    font-size:clamp(1rem,3.5vw,1.14rem);
+    line-height:1.7;
+    color:var(--muted);
+    margin:0;
+    max-width:46ch;
+    margin-inline:auto;
+  }
+
+  .groom{
+    font-family:"Great Vibes", cursive;
+    font-size:clamp(2.4rem,10vw,3.8rem);
+    line-height:1.22;
+    color:var(--ink);
+    margin:clamp(.7rem,2.5vw,1rem) 0 clamp(.9rem,3vw,1.2rem);
+  }
+
+  .lineage{
+    font-size:clamp(.97rem,3.4vw,1.1rem);
+    line-height:1.85;
+    color:var(--ink);
+    margin:0 0 clamp(1rem,3.5vw,1.5rem);
+  }
+
+  /* Small caps plaque, echoing the pills on the printed card */
+  .plaque{
+    display:inline-block;
+    margin:0 0 1rem;
+    padding:.52em 1.15em;
+    border:1px solid var(--gold);
+    border-radius:2px;
+    background:var(--ink);
+    color:var(--light);
+    font-size:clamp(.68rem,2.7vw,.8rem);
+    font-weight:600;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+  }
+
+  .events{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:grid;
+    gap:clamp(1.9rem,5vw,2.2rem);
+  }
+  @media (min-width:640px){
+    .events{ grid-template-columns:repeat(3,1fr); gap:1.1rem; }
+    .event + .event{
+      border-left:1px solid rgba(169,133,69,.35);
+      padding-left:1.1rem;
+    }
+  }
+
+  .when{
+    font-size:clamp(1rem,3.4vw,1.08rem);
+    line-height:1.55;
+    margin:0 0 .85rem;
+  }
+  .when b{
+    display:block;
+    font-weight:600;
+    color:var(--gold);
+  }
+
+  .where{
+    font-size:clamp(.95rem,3.2vw,1.04rem);
+    line-height:1.6;
+    color:var(--muted);
+    margin:0;
+  }
+
+  .compliments{
+    font-size:clamp(1rem,3.5vw,1.14rem);
+    line-height:1.9;
+    margin:0;
+  }
+
+  .contact-label{
+    font-style:italic;
+    font-size:clamp(1rem,3.4vw,1.1rem);
+    color:var(--gold);
+    margin:clamp(1.4rem,4vw,1.9rem) 0 .5rem;
+  }
+
+  .phones{
+    font-size:clamp(1.02rem,3.6vw,1.16rem);
+    margin:0;
+  }
+  .phones a{
+    color:var(--ink);
+    text-decoration:none;
+    border-bottom:1px solid rgba(169,133,69,.55);
+    padding-bottom:1px;
+    white-space:nowrap;
+  }
+  .phones a:hover,
+  .phones a:focus{ color:var(--gold); }
+  .phones .dot{ color:var(--gold); margin:0 .55rem; }
+
+  .foot{
+    margin:clamp(2.2rem,6vw,3rem) auto 0;
+    max-width:420px;
+    padding:1.05rem 1rem;
+    border:1px solid var(--gold);
+    background:var(--ink);
+  }
+  .foot p{ margin:0; }
+  .foot .t{
+    color:var(--gold);
+    font-size:.68rem;
+    letter-spacing:.24em;
+    text-transform:uppercase;
+  }
+  .foot .n{
+    color:var(--light);
+    font-size:clamp(.84rem,3vw,.94rem);
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    margin-top:.4rem;
+  }
+  .foot .l{
+    color:rgba(244,239,223,.72);
+    font-size:.7rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    margin-top:.25rem;
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .stage:not(.playing) > video{ animation:none; }
+    #still{ transition:none; }
+    .stage.finished > .names{ animation:none; opacity:1; }
+    .cue i{ animation:none; }
+  }
+</style>
+</head>
+
+<body>
+  <audio id="music" src="assets/music.mp3" loop preload="auto"></audio>
+
+  <button id="mute" class="mute" type="button" aria-label="Mute music" aria-pressed="false" hidden>
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path class="horn" d="M4 9v6h3.5L13 20V4L7.5 9H4z"/>
+      <path class="wave" d="M16.4 8.6a4.6 4.6 0 0 1 0 6.8"/>
+      <path class="wave" d="M19.1 6a8 8 0 0 1 0 12"/>
+      <line class="slash" x1="3.5" y1="20.5" x2="20.5" y2="3.5"/>
+    </svg>
+  </button>
+
+  <div class="screen">
+    <main class="stage" id="stage">
+      <video id="film"
+             poster="assets/poster.jpg"
+             preload="auto"
+             muted
+             playsinline
+             webkit-playsinline
+             disablepictureinpicture
+             aria-label="Wedding invitation animation">
+        <source src="assets/invite.mp4" type="video/mp4">
+      </video>
+
+      <img id="still" src="assets/final.jpg" alt="" aria-hidden="true">
+
+      <h1 class="names">
+        <span class="n">Nozaina</span>
+        <span class="amp">&amp;</span>
+        <span class="n">Sharjeel</span>
+      </h1>
+
+      <button id="open" type="button" aria-label="Open the wedding invitation"></button>
+    </main>
+
+    <button class="cue" id="cue" type="button">
+      Invitation Details
+      <i aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <section class="details" id="details" inert>
+    <span class="flora art-l f-tl" aria-hidden="true"></span>
+    <span class="flora art-r f-tr" aria-hidden="true"></span>
+    <span class="flora art-r f-ml" aria-hidden="true"></span>
+    <span class="flora art-l f-mr" aria-hidden="true"></span>
+    <span class="flora art-r f-bl" aria-hidden="true"></span>
+    <span class="flora art-l f-br" aria-hidden="true"></span>
+
+    <div class="sheet">
+      <p class="bismillah" lang="ar" dir="rtl">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</p>
+      <p class="bismillah-en">In the Name of Allah, the Most Gracious, the Most Merciful</p>
+
+      <h2 class="blessing">
+        <span class="b1">Blessings &amp; Joyful</span>
+        <span class="b2">Celebration</span>
+      </h2>
+
+      <div class="rule"><i></i></div>
+
+      <p class="lede">We cordially invite you and your family to join us in celebrating the auspicious Mehndi ceremony of our beloved son</p>
+
+      <p class="groom">Sharjeel Mustafa Shahid</p>
+
+      <p class="lineage">
+        Son of: Shahid Hussain<br>
+        Grandson of: Muhammad Saddique
+      </p>
+
+      <p class="lede">Your presence and prayers are humbly requested to bless this sacred union.</p>
+
+      <div class="rule"><i></i></div>
+
+      <ul class="events">
+        <li class="event">
+          <h3 class="plaque">Tail / Mehndi Ceremony</h3>
+          <p class="when">
+            <time datetime="2026-12-18T19:00">Friday, 18th December 2026<b>7:00 PM</b></time>
+          </p>
+          <p class="where">Khan Forte Marriage Hall,<br>Tajpura, Lahore</p>
+        </li>
+
+        <li class="event">
+          <h3 class="plaque">Barat Departure</h3>
+          <p class="when">
+            <time datetime="2026-12-19T07:00">Saturday, 19th December 2026<b>7:00 AM</b></time>
+          </p>
+          <p class="where">House No. 9, Street No. 11,<br>Al Madina Colony,<br>Tajpura, Lahore</p>
+        </li>
+
+        <li class="event">
+          <h3 class="plaque">Walima Ceremony</h3>
+          <p class="when">
+            <time datetime="2026-12-20T13:00">Sunday, 20th December 2026<b>1:00 PM</b></time>
+          </p>
+          <p class="where">Khan Forte Marriage Hall,<br>Tajpura, Lahore</p>
+        </li>
+      </ul>
+
+      <div class="rule"><i></i></div>
+
+      <h2 class="plaque">With Best Compliments</h2>
+      <p class="compliments">
+        Allah Rakha<br>
+        Muhammad Shahzad<br>
+        Saad Ali
+      </p>
+
+      <p class="contact-label">Contact &amp; Queries</p>
+      <p class="phones">
+        <a href="tel:+923354655980">0335-4655980</a>
+        <span class="dot" aria-hidden="true">•</span>
+        <a href="tel:+923004579779">0300-4579779</a>
+      </p>
+
+      <div class="foot">
+        <p class="t">Wedding Invitation</p>
+        <p class="n">Sharjeel Mustafa Shahid</p>
+        <p class="l">Tajpura, Lahore</p>
+      </div>
+    </div>
+  </section>
+
+<script>
+  const stage   = document.getElementById('stage');
+  const film    = document.getElementById('film');
+  const open    = document.getElementById('open');
+  const cue     = document.getElementById('cue');
+  const details = document.getElementById('details');
+  const music   = document.getElementById('music');
+  const mute    = document.getElementById('mute');
+
+  const VOLUME = 0.35;   // background level: present but easy to talk over
+
+  function finish(){
+    stage.classList.add('finished');
+    // The film is over: release the scroll lock and let the details be reached.
+    document.documentElement.classList.remove('locked');
+    details.removeAttribute('inert');
+  }
+
+  open.addEventListener('click', () => {
+    if (stage.classList.contains('playing')) return;
+    stage.classList.add('playing');
+    film.currentTime = 0;
+    // If the browser refuses to play, still show the invitation rather than nothing.
+    const p = film.play();
+    if (p) p.catch(finish);
+
+    // Same gesture starts the music, which is what lets it play with sound.
+    // Set the level outright rather than ramping it: a timed fade needs
+    // requestAnimationFrame, which stalls in a hidden tab and would leave the
+    // music playing at volume 0.
+    music.volume = VOLUME;
+    const m = music.play();
+    // Only offer the control once the audio is actually running.
+    if (m) m.then(() => { mute.hidden = false; }).catch(() => {});
+  });
+
+  mute.addEventListener('click', () => {
+    const muted = !music.muted;
+    music.muted = muted;
+    mute.classList.toggle('is-muted', muted);
+    mute.setAttribute('aria-pressed', String(muted));
+    mute.setAttribute('aria-label', muted ? 'Unmute music' : 'Mute music');
+  });
+
+  film.addEventListener('ended', finish);
+
+  cue.addEventListener('click', () => {
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    details.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block:'start' });
+  });
+</script>
+</body>
+</html>
