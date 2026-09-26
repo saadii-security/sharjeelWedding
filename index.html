@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#f7f3e8">
 <title>Sharjeel &amp; Nozaina — Wedding Invitation</title>
 <meta name="description" content="Wedding invitation of Sharjeel Mustafa Shahid — Mehndi, Barat and Walima, 18–20 December 2026, Tajpura, Lahore.">
 
@@ -18,17 +18,18 @@
     --ink:   #2e3b1f;  /* deep drape olive */
     --gold:  #a98545;  /* candlelight gold */
     --cream: #f8f6ea;  /* the open field in the final frame */
+    --field: #f7f3e8;  /* the cream surrounding the closed envelope */
     --muted: #5b6450;
     --light: #f4efdf;
   }
 
   *{ box-sizing:border-box; }
 
-  html{ background:#000; }
+  html{ background:var(--field); }
 
   body{
     margin:0;
-    background:#000;
+    background:var(--field);
     -webkit-tap-highlight-color:transparent;
   }
 
@@ -51,9 +52,8 @@
     aspect-ratio:720 / 1280;
     width:min(100vw, 56.25vh);
     width:min(100vw, 56.25svh);
-    background:#000;
+    background:var(--field);
     overflow:hidden;
-    box-shadow:0 0 90px rgba(0,0,0,.9);
   }
 
   .stage > video,
@@ -62,8 +62,14 @@
     inset:0;
     width:100%;
     height:100%;
-    object-fit:contain;
+    object-fit:cover;
     display:block;
+  }
+
+  /* The file is 720×1280 with a 100px black bar above and below the artwork.
+     Scale just enough to push those bars outside the stage. */
+  .stage > video{
+    transform:scale(1.1852);
   }
 
   /* Gentle "I'm tappable" breathing, only before the film starts */
@@ -71,8 +77,8 @@
     animation:breathe 3.4s ease-in-out infinite;
   }
   @keyframes breathe{
-    0%,100%{ transform:scale(1); }
-    50%    { transform:scale(1.012); }
+    0%,100%{ transform:scale(1.1852); }
+    50%    { transform:scale(1.1994); }
   }
 
   /* The final frame, held as a still so the ending never flickers or resets */
